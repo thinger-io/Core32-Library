@@ -1,8 +1,8 @@
-#include "ThingerCore32.h"
-#include "ThingerTaskController.h"
-
 #include <Update.h>
 #include <SPIFFS.h>
+
+#include "ThingerCore32.h"
+#include "ThingerTaskController.h"
 
 // memory allocator for thinger
 protoson::dynamic_memory_allocator alloc;

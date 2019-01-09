@@ -6,7 +6,6 @@
 
 #include <WiFiClientSecure.h>
 #include <ThingerWifi.h>
-#include <vector>
 
 class ThingerCore32 : public ThingerClient {
 

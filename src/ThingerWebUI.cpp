@@ -4,7 +4,6 @@
 #include <ESPAsyncWebServer.h>
 #include <AsyncJson.h>
 #include <ArduinoJson.h>
-#include <FS.h>
 
 #include "ThingerCore32.h"
 #include "ThingerWifiConfig.h"

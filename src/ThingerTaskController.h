@@ -1,7 +1,6 @@
 #ifndef THINGER_TASK_CONTROLLER_H
 #define THINGER_TASK_CONTROLLER_H
 
-#include <FreeRTOS.h>
 #include "ThingerCore32.h"
 
 extern void thingerTask(void*);

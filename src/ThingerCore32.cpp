@@ -1,6 +1,5 @@
 #include <ArduinoJson.h>
 #include <SPIFFS.h>
-#include <FS.h>
 
 #include "ThingerCore32.h"
 #include "ThingerWifiConfig.h"
