@@ -68,7 +68,7 @@ protected:
      * @return
      */
     bool wait_for_wifi(unsigned long timeout = WIFI_CONNECTION_TIMEOUT);
-
+    bool connect(const char* ssid, const char* password);
 
 
 private:
