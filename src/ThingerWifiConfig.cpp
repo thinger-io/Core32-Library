@@ -169,7 +169,7 @@ bool ThingerWiFiConfig::disconnect(){
     return WiFi.disconnect();
 }
 
-bool ThingerWiFiConfig::onnect(){
+bool ThingerWiFiConfig::connect(){
     // try to connect to previous known WiFi in the first attempt
     if(current_network_ == -1){
         WiFi.enableSTA(true);
