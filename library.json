@@ -31,11 +31,6 @@
       "name": "ArduinoJson",
       "platforms": "espressif32",
       "version" : "5.13.4"
-    },
-    {
-      "name": "DNSServer",
-      "platforms": "espressif32",
-      "version" : "1.1.0"
     }
   ]
 }
