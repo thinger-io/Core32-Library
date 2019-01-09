@@ -18,6 +18,11 @@
   "platforms": ["espressif32"],
   "dependencies": [
     {
+      "name": "thinger.io",
+      "platforms": "espressif32",
+      "version" : "2.10.0"
+    },
+    {
       "name": "ESP Async WebServer",
       "platforms": "espressif32",
       "version" : "1.2.0"
