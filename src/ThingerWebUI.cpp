@@ -8,8 +8,6 @@
 #include "ThingerCore32.h"
 #include "ThingerWifiConfig.h"
 
-#define CONFIG_FILE "/networks.pson"
-
 #ifndef THINGER_DEVICE_SSID
     #define THINGER_DEVICE_SSID "CORE_32"
 #endif
