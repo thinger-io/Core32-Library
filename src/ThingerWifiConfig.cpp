@@ -2,8 +2,7 @@
 
 ThingerWiFiConfig WiFiConfig;
 
-#define NETWORKS_FILE "/config/networks.json"
-
+#define NETWORKS_FILE "/cfg/networks.json"
 
 ThingerWiFiConfig::ThingerWiFiConfig() :
         available_networks_(-1),
@@ -34,7 +33,7 @@ bool ThingerWiFiConfig::get_network(unsigned short index, String& ssid, String& 
 }
 
 JsonArray& ThingerWiFiConfig::get_networks(DynamicJsonBuffer& buffer) {
-    File configFile = SPIFFS.open(NETWORKS_FILE, "r");
+    File configFile = SPIFFS.open(NETWORKS_FILE, FILE_READ);
     if (!configFile) return buffer.createArray();
     JsonArray& networks = buffer.parseArray(configFile);
     configFile.close();
@@ -53,13 +52,16 @@ bool ThingerWiFiConfig::add_network(const String& ssid, const String& pswd) {
 #endif
 
     // open file for writing
-    File writeFile = SPIFFS.open(NETWORKS_FILE, "w");
-    if(!writeFile) return false;
+    File writeFile = SPIFFS.open(NETWORKS_FILE, FILE_WRITE);
+    if(!writeFile){
+        THINGER_DEBUG("NETWORK", "Cannot open networks file in write mode...");
+        return false;
+    }
 
     bool update = false;
     for(auto & network : networks){
         if(network["ssid"]==ssid){
-            THINGER_DEBUG("NETWORK", "Updating WiFi!");
+            THINGER_DEBUG("NETWORK", "Updating existing SSID!");
             network["pswd"] = pswd;
             update = true;
             break;
@@ -67,6 +69,7 @@ bool ThingerWiFiConfig::add_network(const String& ssid, const String& pswd) {
     }
 
     if(!update){
+        THINGER_DEBUG("NETWORK", "Adding new WiFi!");
         JsonObject& network = buffer.createObject();
         network["ssid"] = ssid;
         network["pswd"] = pswd;
@@ -189,7 +192,7 @@ bool ThingerWiFiConfig::connect(){
         int available_networks = networks_count();
         if(available_networks<=0){
             THINGER_DEBUG("NETWORK", "No networks available...");
-            if(!TaskController.isTaskRunning(TaskController.WEB_CONFIG)){
+            if(!TaskController.isRunning(TaskController.WEB_CONFIG)){
                 TaskController.startTask(TaskController.WEB_CONFIG);
                 TaskController.stopTask(TaskController.THINGER);
             }
