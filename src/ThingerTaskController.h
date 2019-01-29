@@ -64,8 +64,17 @@ public:
         return false;
     }
 
-    bool isTaskRunning(Task task){
+    bool isRunning(Task task){
         return taskHandlers_[task].taskHandler_ != NULL;
+    }
+
+    bool setTaskState(Task task, bool enabled){
+        if(enabled) return startTask(task);
+        return stopTask(task);
+    }
+
+    const char* taskName(Task task){
+        return taskHandlers_[task].taskName_;
     }
 
 private:
