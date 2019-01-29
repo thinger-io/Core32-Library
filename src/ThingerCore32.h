@@ -10,14 +10,7 @@
 class ThingerCore32 : public ThingerClient {
 
 public:
-    ThingerCore32() : ThingerClient(client_, user, device, device_credential),
-        initialized_(false)
-    {
-        // initialize empty configuration
-        user[0] = '\0';
-        device[0] = '\0';
-        device_credential[0] = '\0';
-    }
+    ThingerCore32();
 
     ~ThingerCore32(){
 
@@ -25,13 +18,81 @@ public:
 
     void on_wifi_disconnected();
 
+
+    /**
+     * Method that will force a reconnect to the server
+     */
+    void reconnect();
+
+    /**
+     * Get the current user
+     * @return
+     */
+    const char* get_user(){
+        return user;
+    }
+
+    /**
+     * Get the current device id
+     * @return
+     */
+    const char* get_device(){
+        return device;
+    }
+
+    /**
+     * Get the current device credential
+     * @return
+     */
+    const char* get_device_credential(){
+        return device_credential;
+    }
+
+    /**
+     * Load device credentials, from file to memory
+     * @return
+     */
+    bool load_credentials();
+
+    /**
+     * Check if the device has configured credentials
+     * @return
+     */
+    bool has_credentials();
+
+    /**
+     * Modify the device credentials, both in memory and file
+     * @param user
+     * @param device
+     * @param credentials
+     * @return
+     */
+    bool set_credentials(const char* user, const char* device, const char* credentials);
+
+    /**
+     * Remove current credentials
+     * @param user
+     * @param device
+     * @param credentials
+     * @return
+     */
+    bool remove_credentials();
+
 protected:
+
+    /**
+     * Implementation for ThingerClient class, that will check if the device is connected to network
+     * @return
+     */
     virtual bool network_connected();
+
+    /**
+     * Implementation for ThingerClient class, that will connect to the network
+     * @return
+     */
     virtual bool connect_network();
 
 private:
-
-    bool load_credentials();
 
 #ifndef _DISABLE_TLS_
     WiFiClientSecure client_;
