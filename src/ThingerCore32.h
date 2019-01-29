@@ -1,7 +1,6 @@
 #ifndef THINGER_CORE_32_H
 #define THINGER_CORE_32_H
 
-#define _DEBUG_
 #define THINGER_DO_NOT_INIT_MEMORY_ALLOCATOR
 
 #include <WiFiClientSecure.h>
