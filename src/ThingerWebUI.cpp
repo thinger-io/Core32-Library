@@ -58,6 +58,17 @@ void webConfigTask(void *pvParameters){
 
     DefaultHeaders::Instance().addHeader("Access-Control-Allow-Origin", "*");
 
+    server.onNotFound([](AsyncWebServerRequest *request) {
+        if (request->method() == HTTP_OPTIONS) {
+            AsyncWebServerResponse *response = request->beginResponse(200);
+            response->addHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
+            response->addHeader("Access-Control-Allow-Methods", "GET, POST, PUT, OPTIONS, DELETE");
+            request->send(response);
+        } else {
+            request->send(404);
+        }
+    });
+
     //server.addHandler(new CaptiveRequestHandler()).setFilter(ON_AP_FILTER);//only when requested from AP
 
     server.serveStatic("/", SPIFFS, "/www/").setDefaultFile("index.html");
@@ -76,77 +87,86 @@ void webConfigTask(void *pvParameters){
     });
 
     server.on("/scan", HTTP_GET, [](AsyncWebServerRequest *request){
-        String json = "[";
+        DynamicJsonBuffer buffer;
+        JsonArray& wifis = buffer.createArray();
         int n = WiFi.scanComplete();
         if(n == -2){
+            THINGER_DEBUG("NETWORK", "Scanning Networks...");
             WiFi.scanNetworks(true);
         } else if(n){
             for (int i = 0; i < n; ++i){
-                if(i) json += ",";
-                json += "{";
-                json += "\"ssid\":\""+WiFi.SSID(i)+"\"";
-                json += ",\"rssi\":"+String(WiFi.RSSI(i));
-                json += ",\"bssid\":\""+WiFi.BSSIDstr(i)+"\"";
-                json += ",\"chan\":"+String(WiFi.channel(i));
-                json += ",\"auth\":"+String(WiFi.encryptionType(i));
-                json += "}";
+                JsonObject& ssid = buffer.createObject();
+                ssid["ssid"] = WiFi.SSID(i);
+                ssid["rssi"] = WiFi.RSSI(i);
+                ssid["bssid"] = WiFi.BSSIDstr(i);
+                ssid["chan"] = WiFi.channel(i);
+                ssid["auth"] = WiFi.encryptionType(i);
+                wifis.add(ssid);
             }
             WiFi.scanDelete();
             if(WiFi.scanComplete() == -2){
                 WiFi.scanNetworks(true);
             }
         }
-        json += "]";
-        request->send(200, "application/json", json);
+        AsyncResponseStream *response = request->beginResponseStream("application/json");
+        wifis.printTo(*response);
+        request->send(response);
     });
 
     server.on("/status", HTTP_GET, [](AsyncWebServerRequest *request){
-        String json = "{";
-        json += "\"ssid\":\""+WiFi.SSID()+"\"";
-        json += ",\"ip\":\""+WiFi.localIP().toString()+"\"";
-        json += ",\"netmask\":\""+WiFi.subnetMask().toString()+"\"";
-        json += ",\"gw\":\""+WiFi.gatewayIP().toString()+"\"";
-        json += "}";
-        request->send (200, "application/json", json);
+        DynamicJsonBuffer buffer;
+        JsonObject& ssid = buffer.createObject();
+        ssid["ssid"] = WiFi.SSID();
+        ssid["ip"] = WiFi.localIP().toString();
+        ssid["netmask"] = WiFi.subnetMask().toString();
+        ssid["gw"] = WiFi.gatewayIP().toString();
+        AsyncResponseStream *response = request->beginResponseStream("application/json");
+        ssid.printTo(*response);
+        request->send(response);
     });
 
-    AsyncCallbackJsonWebHandler* handler = new AsyncCallbackJsonWebHandler("/connect", [](AsyncWebServerRequest *request, JsonVariant &json) {
+    AsyncCallbackJsonWebHandler* connectHandler = new AsyncCallbackJsonWebHandler("/connect", [](AsyncWebServerRequest *request, JsonVariant &json) {
         JsonObject& network = json.as<JsonObject>();
-        THINGER_DEBUG_VALUE("NETWORK", "Received SSID: ", (const String&) network["ssid"]);
-        THINGER_DEBUG_VALUE("NETWORK", "Received Password: ", (const String&) network["pswd"]);
-        // add the network, so it will be available for the next reconnection
-        WiFiConfig.add_network(network["ssid"], network["pswd"]);
-        // send ok...
-        request->send(200);
-        // disconnect...
-        WiFiConfig.disconnect();
-        thing.on_wifi_disconnected();
-    });
-    server.addHandler(handler);
+        THINGER_DEBUG_VALUE("NETWORK", "Received SSID: ", (const char*) network["ssid"]);
+        THINGER_DEBUG_VALUE("NETWORK", "Received Password: ", (const char*) network["pswd"]);
 
-    AsyncCallbackJsonWebHandler* handlerm = new AsyncCallbackJsonWebHandler("/disconnect", [](AsyncWebServerRequest *request, JsonVariant &json) {
+        // add the network, so it will be available for the next reconnection
+        bool result = WiFiConfig.add_network(network["ssid"], network["pswd"]);
+
+        // send ok or error...
+        request->send(result ? 200: 500);
+
+        if(result){
+            // disconnect...
+            WiFiConfig.disconnect();
+
+            // force device reconnection
+            thing.reconnect();
+        }
+    });
+    server.addHandler(connectHandler);
+
+    AsyncCallbackJsonWebHandler* disconnectHandler = new AsyncCallbackJsonWebHandler("/disconnect", [](AsyncWebServerRequest *request, JsonVariant &json) {
         JsonObject& jsonObj = json.as<JsonObject>();
         const String& ssid = jsonObj["ssid"];
 
         if(ssid==WiFi.SSID()){
             THINGER_DEBUG("NETWORK", "Disconnecting current Network...");
             WiFiConfig.disconnect();
+            // TODO MOVE INSIDE DISCONNECT??
             thing.on_wifi_disconnected();
         }
 
-        if(WiFiConfig.remove_network(jsonObj["ssid"])){
-            request->send(200);
-        }else{
-            request->send(404);
-        }
-
+        bool result = WiFiConfig.remove_network(jsonObj["ssid"]);
+        request->send(result ? 200 : 404);
     });
-    server.addHandler(handlerm);
+    server.addHandler(disconnectHandler);
 
     server.begin();
 
 
     for(;;){
         dnsServer.processNextRequest();
+        delay(1000);
     }
 }
