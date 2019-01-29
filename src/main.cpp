@@ -192,8 +192,10 @@ extern "C" void app_main(){
     initArduino();
     initThingerOTA();
 
+#ifdef _DEBUG_
     Serial.begin(115200);
     THINGER_DEBUG("CORE32", "Debug Enabled");
+#endif
 
     // TODO review to remove true in production.. it may erase all files if begin fails in some way
     if(!SPIFFS.begin(true)){
