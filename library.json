@@ -23,14 +23,29 @@
       "version" : "2.10.0"
     },
     {
+      "name": "ArduinoJson",
+      "platforms": "espressif32",
+      "version" : "5.13.4"
+    },
+    {
+      "name": "AsyncTCP",
+      "platforms": "espressif32",
+      "version" : "1.0.3"
+    },
+    {
       "name": "ESP Async WebServer",
       "platforms": "espressif32",
       "version" : "1.2.0"
     },
     {
-      "name": "ArduinoJson",
+      "name": "DNSServer",
       "platforms": "espressif32",
-      "version" : "5.13.4"
+      "version" : "1.1.0"
+    },
+    {
+      "name": "Update",
+      "platforms": "espressif32",
+      "version" : "1.0"
     }
   ]
 }
