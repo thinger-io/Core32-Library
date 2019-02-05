@@ -8,8 +8,8 @@
 protoson::dynamic_memory_allocator alloc;
 protoson::memory_allocator& protoson::pool = alloc;
 
-// variables for measuring OTA
-unsigned long startOTA, stopOTA = 0;
+// flag for rebooting device cleanly
+bool reboot = false;
 
 // ThingerCore32 instance
 ThingerCore32 thing;
@@ -171,14 +171,16 @@ void initThingerOTA(){
     };
 
     thing["CORE"]["REBOOT"] = [](){
-        ESP.restart();
+        reboot = true;
     };
 }
 
 void thingerTask(void* pvParameters){
-    for(;;){
+    for(;!reboot;){
         thing.handle();
     }
+    thing.stop();
+    ESP.restart();
 }
 
 void loopTask(void *pvParameters){
@@ -189,13 +191,15 @@ void loopTask(void *pvParameters){
 }
 
 extern "C" void app_main(){
-    initArduino();
-    initThingerOTA();
 
 #ifdef _DEBUG_
     Serial.begin(115200);
     THINGER_DEBUG("CORE32", "Debug Enabled");
 #endif
+
+    // init loop as soon as possible
+    initArduino();
+    TaskController.startTask(TaskController.LOOP);
 
     // TODO review to remove true in production.. it may erase all files if begin fails in some way
     if(!SPIFFS.begin(true)){
@@ -203,7 +207,8 @@ extern "C" void app_main(){
         return;
     }
 
-    TaskController.startTask(TaskController.LOOP);
+    // root thinger task
+    initThingerOTA();
     TaskController.startTask(TaskController.THINGER);
     //TaskController.startTask(TaskController.WEB_CONFIG);
 }
