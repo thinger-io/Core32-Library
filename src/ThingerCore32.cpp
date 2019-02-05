@@ -14,13 +14,14 @@
 
 
 ThingerCore32::ThingerCore32() :
-ThingerClient(client_, user, device, device_credential),
-initialized_(false)
+        ThingerClient(client_, user, device, device_credential),
+        initialized_(false)
 {
     // initialize empty configuration
     user[0] = '\0';
     device[0] = '\0';
     device_credential[0] = '\0';
+    semaphore_ = xSemaphoreCreateMutex();
 }
 
 bool ThingerCore32::load_credentials() {
@@ -92,6 +93,14 @@ bool ThingerCore32::set_credentials(const char* username_, const char* device_, 
 bool ThingerCore32::remove_credentials() {
     if(!SPIFFS.remove(DEVICE_CONFIG_FILE)) return false;
     return load_credentials();
+}
+
+bool ThingerCore32::lock(){
+    return xSemaphoreTake(semaphore_, ( TickType_t ) 10);
+}
+
+bool ThingerCore32::unlock(){
+    return xSemaphoreGive(semaphore_);
 }
 
 bool ThingerCore32::network_connected(){

@@ -77,6 +77,20 @@ public:
      */
     bool remove_credentials();
 
+
+    /**
+     * Lock the usage of client object
+     * @return true if it safe to use the client object
+     */
+    bool lock();
+
+    /**
+     * Unlock the usage of client object
+     * @return true if the client was released
+     */
+    bool unlock();
+
+
 protected:
 
     /**
@@ -91,6 +105,7 @@ protected:
      */
     virtual bool connect_network();
 
+
 private:
 
 #ifndef _DISABLE_TLS_
@@ -103,6 +118,7 @@ private:
     char user[40];
     char device[40];
     char device_credential[40];
+    SemaphoreHandle_t semaphore_;
 };
 
 extern ThingerCore32 thing;
