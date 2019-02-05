@@ -20,7 +20,7 @@
     {
       "name": "thinger.io",
       "platforms": "espressif32",
-      "version" : "2.12.0"
+      "version" : "https://github.com/thinger-io/Arduino-Library.git"
     },
     {
       "name": "ArduinoJson",
