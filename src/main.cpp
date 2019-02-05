@@ -10,6 +10,7 @@ protoson::memory_allocator& protoson::pool = alloc;
 
 // flag for rebooting device cleanly
 bool reboot = false;
+unsigned long startOTA, stopOTA = 0;
 
 // ThingerCore32 instance
 ThingerCore32 thing;
