@@ -2,6 +2,7 @@
 #include <SPIFFS.h>
 
 #include "ThingerCore32.h"
+#include "ThingerConsole.h"
 #include "ThingerTaskController.h"
 
 // memory allocator for thinger
@@ -14,6 +15,7 @@ unsigned long startOTA, stopOTA = 0;
 
 // ThingerCore32 instance
 ThingerCore32 thing;
+ThingerConsole Console(thing);
 
 void initThingerOTA(){
 

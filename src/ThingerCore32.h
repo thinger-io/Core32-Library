@@ -2,18 +2,17 @@
 #define THINGER_CORE_32_H
 
 #define THINGER_DO_NOT_INIT_MEMORY_ALLOCATOR
-
 #include <WiFiClientSecure.h>
-#include <ThingerWifi.h>
+#include <ThingerClient.h>
+#include "ThingerConsole.h"
 
 class ThingerCore32 : public ThingerClient {
 
 public:
+
     ThingerCore32();
 
-    ~ThingerCore32(){
-
-    }
+    virtual ~ThingerCore32();
 
     void on_wifi_disconnected();
 

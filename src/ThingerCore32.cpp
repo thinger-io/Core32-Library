@@ -12,7 +12,6 @@
 #define DEVICE_FIELD "device"
 #define CREDENTIAL_FIELD "credential"
 
-
 ThingerCore32::ThingerCore32() :
         ThingerClient(client_, user, device, device_credential),
         initialized_(false)
@@ -22,6 +21,10 @@ ThingerCore32::ThingerCore32() :
     device[0] = '\0';
     device_credential[0] = '\0';
     semaphore_ = xSemaphoreCreateMutex();
+}
+
+ThingerCore32::~ThingerCore32(){
+
 }
 
 bool ThingerCore32::load_credentials() {
